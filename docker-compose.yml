@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stock-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist data and models between container runs
+      - ./backend/data:/app/data
+      - ./backend/models:/app/models
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stock-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    # No special env needed if you keep API URL as http://localhost:8000

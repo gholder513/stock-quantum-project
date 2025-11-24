@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# Data & models
+data/
+backend/data/
+models/
+*.csv
+*.pkl
+
+# Build outputs
+dist/
+build/
+
+# OS junk
+.DS_Store
