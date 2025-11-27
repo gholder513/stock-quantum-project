@@ -19,7 +19,7 @@ function App() {
 
   const handlePredict = async () => {
     if (!selectedTicker || !date) {
-      setError("Please select a ticker and a date.");
+      setError("Please select a valid ticker and a date(within 2015-2020).");
       return;
     }
 
@@ -82,7 +82,7 @@ function App() {
           value={modelName}
           onChange={(e) => setModelName(e.target.value)}
         >
-          <option value="random_forest">Random Forest (classical)</option>
+          <option value="random_forest">Random Forest (baseline)</option>
           <option value="quantum_dummy">Quantum Dummy (stub)</option>
         </select>
       </div>
