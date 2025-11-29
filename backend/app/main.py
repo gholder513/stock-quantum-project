@@ -7,8 +7,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import config
 from app.data.load_data import load_or_build_all_data
-from app.models.classical import get_random_forest_model
-from app.models.quantum import quantum_dummy_predict
+from app.models.classical import (
+    get_random_forest_model,
+    get_logreg_model,
+    get_svm_model,
+)
+from app.models.quantum import (
+    quantum_dummy_predict,
+    quantum_vqc_predict,
+    quantum_qnn_predict,
+)
 from app.schemas import PredictionRequest, PredictionResponse
 
 app = FastAPI(title="Stock Quantum Project API")
@@ -29,15 +37,48 @@ app.add_middleware(
 
 DATA_DF: pd.DataFrame | None = None
 RF_MODEL = None
+LOGREG_MODEL = None
+SVM_MODEL = None
+
+
+def ensure_data_and_models_loaded() -> None:
+    """
+    Lazy-load data and classical models if they haven't been loaded yet.
+    This makes the API robust even if the startup event didn't preload them.
+    """
+    global DATA_DF, RF_MODEL, LOGREG_MODEL, SVM_MODEL
+
+    if DATA_DF is None:
+        print("Lazy-loading data...")
+        DATA_DF = load_or_build_all_data()
+
+    if RF_MODEL is None:
+        print("Lazy-loading Random Forest model...")
+        RF_MODEL = get_random_forest_model()
+
+    if LOGREG_MODEL is None:
+        print("Lazy-loading Logistic Regression model...")
+        LOGREG_MODEL = get_logreg_model()
+
+    if SVM_MODEL is None:
+        print("Lazy-loading Linear SVM model...")
+        SVM_MODEL = get_svm_model()
 
 
 @app.on_event("startup")
-def startup_event():
-    global DATA_DF, RF_MODEL
+def startup_event() -> None:
+    """
+    Eagerly load data and models on startup.
+    If this fails for some reason, ensure_data_and_models_loaded()
+    will still handle it lazily on first request.
+    """
     print("Loading data and models at startup...")
-    DATA_DF = load_or_build_all_data()
-    RF_MODEL = get_random_forest_model()
-    print("Startup complete.")
+    try:
+        ensure_data_and_models_loaded()
+        print("Startup complete.")
+    except Exception as e:
+        # Don't crash the app lazy loader will retry later.
+        print(f"Startup encountered an error (will retry lazily): {e!r}")
 
 
 @app.get("/api/health")
@@ -47,17 +88,44 @@ def health():
 
 @app.get("/api/tickers")
 def list_tickers() -> List[str]:
-    if DATA_DF is None:
-        raise HTTPException(status_code=500, detail="Data not loaded")
-    return sorted(DATA_DF["ticker"].unique().tolist())
+    ensure_data_and_models_loaded()
+    # DATA_DF is guaranteed non-None after ensure_data_and_models_loaded()
+    return sorted(DATA_DF["ticker"].unique().tolist())  # type: ignore[union-attr]
+
+
+def _predict_with_hold_threshold(model, X: np.ndarray, hold_threshold: float = 0.6):
+    """
+    Shared logic for classical models:
+    - Get class probabilities via predict_proba
+    - Apply HOLD-threshold rule to reduce HOLD bias
+    """
+    proba = model.predict_proba(X)[0]
+    classes = model.classes_
+    prob_map = {cls: float(p) for cls, p in zip(classes, proba)}
+
+    p_buy = prob_map.get("BUY", 0.0)
+    p_hold = prob_map.get("HOLD", 0.0)
+    p_sell = prob_map.get("SELL", 0.0)
+
+    if (
+        p_hold >= hold_threshold
+        and p_hold >= p_buy
+        and p_hold >= p_sell
+    ):
+        decision = "HOLD"
+    else:
+        decision = "BUY" if p_buy >= p_sell else "SELL"
+
+    return decision, prob_map
 
 
 @app.post("/api/predict", response_model=PredictionResponse)
 def predict(req: PredictionRequest):
-    if DATA_DF is None:
-        raise HTTPException(status_code=500, detail="Data not loaded")
+    ensure_data_and_models_loaded()
 
-    df = DATA_DF
+    df = DATA_DF  # type: ignore[assignment]
+    if df is None:
+        raise HTTPException(status_code=500, detail="Data not loaded")
 
     # Filter for specific ticker and date
     row = df[(df["ticker"] == req.ticker) & (df["Date"] == req.date)]
@@ -67,47 +135,31 @@ def predict(req: PredictionRequest):
             detail="No data for that ticker/date (might be a weekend/holiday).",
         )
 
+    # Extract features
     X = row[config.FEATURE_COLS].values.astype(float)
 
+    # Dispatch based on model_name
     if req.model_name == "random_forest":
-        # Classical prediction
-        # proba = RF_MODEL.predict_proba(X)[0]
-        # classes = RF_MODEL.classes_
-        # decision_idx = int(np.argmax(proba))
-        # decision = classes[decision_idx]
-        # probs = {cls: float(p) for cls, p in zip(classes, proba)}
-        
-        proba = RF_MODEL.predict_proba(X)[0]
-        classes = RF_MODEL.classes_
-        prob_map = {cls: float(p) for cls, p in zip(classes, proba)}
+        decision, probs = _predict_with_hold_threshold(RF_MODEL, X)
 
-        p_buy = prob_map.get("BUY", 0.0)
-        p_hold = prob_map.get("HOLD", 0.0)
-        p_sell = prob_map.get("SELL", 0.0)
+    elif req.model_name == "logreg":
+        decision, probs = _predict_with_hold_threshold(LOGREG_MODEL, X)
 
-        # Only choose HOLD if its probability exceeds a threshold(to limit bias)
-        HOLD_THRESHOLD = 0.6  # you can tune this
-
-        if (
-            p_hold >= HOLD_THRESHOLD
-            and p_hold >= p_buy
-            and p_hold >= p_sell
-        ):
-            decision = "HOLD"
-        else:
-            # Otherwise, commit to a direction buy vs sell,
-            # ignoring hold even if it's slightly higher.
-            if p_buy >= p_sell:
-                decision = "BUY"
-            else:
-                decision = "SELL"
-
-        probs = prob_map
+    elif req.model_name == "svm_linear":
+        decision, probs = _predict_with_hold_threshold(SVM_MODEL, X)
 
     elif req.model_name == "quantum_dummy":
-        # Stub quantum model – use same features, but random distribution
         probs = quantum_dummy_predict(X)
         decision = max(probs, key=probs.get)
+
+    elif req.model_name == "quantum_vqc":
+        probs = quantum_vqc_predict(X)
+        decision = max(probs, key=probs.get)
+
+    elif req.model_name == "quantum_qnn":
+        probs = quantum_qnn_predict(X)
+        decision = max(probs, key=probs.get)
+
     else:
         raise HTTPException(
             status_code=400,

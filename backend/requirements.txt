@@ -7,3 +7,5 @@ yfinance
 scikit-learn
 joblib
 python-dotenv
+qiskit>=1.1.0
+pennylane>=0.37.0

@@ -83,7 +83,12 @@ function App() {
           onChange={(e) => setModelName(e.target.value)}
         >
           <option value="random_forest">Random Forest (baseline)</option>
-          <option value="quantum_dummy">Quantum Dummy (stub)</option>
+          <option value="logreg">Logistic Regression</option>
+          <option value="svm_linear">Linear SVM</option>
+
+          {/* <option value="quantum_dummy">Quantum Dummy (random stub)</option> */}
+          <option value="quantum_vqc">Quantum VQC (Qiskit)</option>
+          <option value="quantum_qnn">Quantum QNN (PennyLane)</option>
         </select>
       </div>
 
