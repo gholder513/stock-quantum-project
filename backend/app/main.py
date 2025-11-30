@@ -13,7 +13,6 @@ from app.models.classical import (
     get_svm_model,
 )
 from app.models.quantum import (
-    quantum_dummy_predict,
     quantum_vqc_predict,
     quantum_qnn_predict,
 )
@@ -147,10 +146,6 @@ def predict(req: PredictionRequest):
 
     elif req.model_name == "svm_linear":
         decision, probs = _predict_with_hold_threshold(SVM_MODEL, X)
-
-    elif req.model_name == "quantum_dummy":
-        probs = quantum_dummy_predict(X)
-        decision = max(probs, key=probs.get)
 
     elif req.model_name == "quantum_vqc":
         probs = quantum_vqc_predict(X)

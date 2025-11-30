@@ -1,7 +1,9 @@
-# 📘 Stock Movement Classification Using Classical & Quantum Models (2015–2020)
+# Stock Movement Classification Using Classical & Quantum Models (2015–2020)
 
 ##  Developer Notes
 Ran into early developmental issue where we had an unoriginal distribution of holds dominating our random forest output. This was due to our metrics being to agressive. For major S&P companies a 5% return change over a 10 day hold period is unlikely. I've been messing with changing our threshold to 3 and even 2% to encourage more volatility. We can also have our model give balanced weights but that will lower accuracy which I'm trying to stray away from doing if possible(changing class weights to balanced in our training function, class_weight="balanced").
+
+Moved to a 1% change on 2 day look ahead. 
 
 For reference this was our original label distribution with 5% return and a 10 day hold period:
 Label distribution:
@@ -42,6 +44,9 @@ Add CircuitQNN imports
 
 Run via docker:
 docker compose up --build
+docker compose up -d to have your terminal return and the app run in the background
+^^ I used this to rerun backend after changes made and if I wanted to see logs I did
+docker compose ps
 
 ##  Project Overview
 

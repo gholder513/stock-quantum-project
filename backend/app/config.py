@@ -13,9 +13,9 @@ START_DATE = "2015-01-01"
 END_DATE = "2020-12-31"
 
 # Labeling configuration
-LABEL_HORIZON_DAYS = 10      # look-ahead window
-BUY_THRESHOLD = 0.05          # +1%
-SELL_THRESHOLD = -0.05        # -1%
+LABEL_HORIZON_DAYS = 2      # look-ahead window
+BUY_THRESHOLD = 0.01          # +1%
+SELL_THRESHOLD = -0.01        # -1%
 
 # Features used for model training
 FEATURE_COLS = [

@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     build:
@@ -9,7 +7,6 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Persist data and models between container runs
       - ./backend/data:/app/data
       - ./backend/models:/app/models
     environment:
@@ -24,4 +21,7 @@ services:
       - "5173:5173"
     depends_on:
       - backend
-    # No special env needed if you keep API URL as http://localhost:8000
+    volumes:
+      
+      - ./frontend:/app
+      - /app/node_modules
