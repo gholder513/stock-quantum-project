@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchTickers, getPrediction } from "./services/api";
 import type { PredictionResponse } from "./services/api";
+import "./App.css";
 
 function App() {
   const [tickers, setTickers] = useState<string[]>([]);
@@ -19,7 +20,7 @@ function App() {
 
   const handlePredict = async () => {
     if (!selectedTicker || !date) {
-      setError("Please select a valid ticker and a date(within 2015-2020).");
+      setError("Please select a valid ticker and date (within 2015-2020).");
       return;
     }
 
@@ -37,90 +38,145 @@ function App() {
     }
   };
 
+  const modelLabels: Record<string, string> = {
+    random_forest: "Random Forest",
+    logreg: "Logistic Regression",
+    svm_linear: "Linear SVM",
+    quantum_vqc: "Quantum VQC",
+    quantum_qnn: "Quantum QNN"
+  };
+
   return (
-    <div style={{ padding: "2rem", fontFamily: "system-ui" }}>
-      <h1>Stock Decisions: Classical vs Quantum</h1>
-      <p>
-        Select a ticker, date, and model to get a <b>BUY / HOLD / SELL</b>{" "}
-        decision.
-      </p>
-
-      {error && (
-        <div style={{ color: "red", marginBottom: "1rem" }}>{error}</div>
-      )}
-
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ marginRight: "0.5rem" }}>Ticker:</label>
-        <select
-          value={selectedTicker}
-          onChange={(e) => setSelectedTicker(e.target.value)}
-        >
-          <option value="">-- select --</option>
-          {tickers.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ marginRight: "0.5rem" }}>Date:</label>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-        <span style={{ marginLeft: "0.5rem", fontSize: "0.85rem" }}>
-          (must be a trading day between 2015–2020)
-        </span>
-      </div>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <label style={{ marginRight: "0.5rem" }}>Model:</label>
-        <select
-          value={modelName}
-          onChange={(e) => setModelName(e.target.value)}
-        >
-          <option value="random_forest">Random Forest (baseline)</option>
-          <option value="logreg">Logistic Regression</option>
-          <option value="svm_linear">Linear SVM</option>
-
-          {/* <option value="quantum_dummy">Quantum Dummy (random stub)</option> */}
-          <option value="quantum_vqc">Quantum VQC (Qiskit)</option>
-          <option value="quantum_qnn">Quantum QNN (PennyLane)</option>
-        </select>
-      </div>
-
-      <button onClick={handlePredict} disabled={loading}>
-        {loading ? "Predicting..." : "Get Decision"}
-      </button>
-
-      {result && (
-        <div style={{ marginTop: "2rem" }}>
-          <h2>
-            Decision:{" "}
-            <span
-              style={{
-                color:
-                  result.decision === "BUY"
-                    ? "green"
-                    : result.decision === "SELL"
-                    ? "crimson"
-                    : "orange",
-              }}
-            >
-              {result.decision}
-            </span>
-          </h2>
-          <p>
-            <b>Ticker:</b> {result.ticker} | <b>Date:</b> {result.date} |{" "}
-            <b>Model:</b> {result.model_name}
-          </p>
-          <h3>Probabilities</h3>
-          <pre>{JSON.stringify(result.probabilities, null, 2)}</pre>
+    <div className="quantum-container">
+      <div className="hero-header">
+        <div className="hero-content">
+          <h1 className="main-title">Quantum Trading AI</h1>
+          <div className="badges">
+            <span className="badge">Quantum Computing</span>
+            <span className="badge">2015-2020 Dataset</span>
+            <span className="badge">5 ML Models</span>
+          </div>
         </div>
-      )}
+      </div>
+
+      <div className="content-wrapper">
+        <div className="card">
+          <h2 className="card-title">Configure Prediction</h2>
+          <p className="card-subtitle">
+            Select your parameters to generate AI-powered trading signals
+          </p>
+
+          {error && (
+            <div className="alert alert-error">
+              <span>⚠</span>
+              {error}
+            </div>
+          )}
+
+          <div className="form-group">
+            <label className="form-label">Stock Ticker</label>
+            <select
+              className="form-select"
+              value={selectedTicker}
+              onChange={(e) => setSelectedTicker(e.target.value)}
+            >
+              <option value="">Choose a stock...</option>
+              {tickers.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Trading Date</label>
+            <input
+              className="form-input"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              min="2015-01-01"
+              max="2020-12-31"
+            />
+            <span className="form-hint">Historical trading day (2015-2020)</span>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">AI Model</label>
+            <select
+              className="form-select"
+              value={modelName}
+              onChange={(e) => setModelName(e.target.value)}
+            >
+              <option value="random_forest">Random Forest</option>
+              <option value="logreg">Logistic Regression</option>
+              <option value="svm_linear">Linear SVM</option>
+              <option value="quantum_vqc">Quantum VQC (Qiskit)</option>
+              <option value="quantum_qnn">Quantum QNN (PennyLane)</option>
+            </select>
+          </div>
+
+          <button 
+            className="btn-predict" 
+            onClick={handlePredict} 
+            disabled={loading}
+          >
+            {loading ? "Analyzing Market Data..." : "Generate Prediction"}
+          </button>
+        </div>
+
+        <div className="card">
+          {!result ? (
+            <div className="placeholder">
+              <div className="placeholder-icon">📊</div>
+              <h3>Awaiting Analysis</h3>
+              <p>
+                Configure your parameters and click "Generate Prediction" to receive trading insights based on historical patterns and quantum algorithms.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className="result-header">
+                <span className="result-label">Trading Signal</span>
+                <span className={`decision-badge decision-${result.decision.toLowerCase()}`}>
+                  {result.decision}
+                </span>
+              </div>
+
+              <div className="meta-grid">
+                <div className="meta-item">
+                  <div className="meta-label">Ticker</div>
+                  <div className="meta-value">{result.ticker}</div>
+                </div>
+                <div className="meta-item">
+                  <div className="meta-label">Date</div>
+                  <div className="meta-value">{result.date}</div>
+                </div>
+                <div className="meta-item">
+                  <div className="meta-label">Model</div>
+                  <div className="meta-value">{modelLabels[result.model_name]}</div>
+                </div>
+              </div>
+
+              <div className="probabilities-section">
+                <h3>Probability Distribution</h3>
+                {Object.entries(result.probabilities).map(([label, value]) => (
+                  <div key={label} className="prob-item">
+                    <div className="prob-header">
+                      <span className="prob-label">{label}</span>
+                      <span className="prob-value">{(value * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="prob-bar">
+                      <div className="prob-fill" style={{ width: `${value * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
