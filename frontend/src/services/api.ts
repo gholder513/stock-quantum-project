@@ -1,4 +1,3 @@
-// frontend/src/services/api.ts
 export interface PredictionResponse {
   ticker: string;
   date: string;
@@ -7,8 +6,21 @@ export interface PredictionResponse {
   probabilities: Record<string, number>;
 }
 
-// Base URL for the FastAPI backend.
-// IMPORTANT: this must be reachable from the *browser*, so we default to localhost.
+export interface ModelMetric {
+  name: string;
+  kind: "classical" | "quantum";
+  accuracy_vs_true: number;
+  agreement_with_rf: number;
+  training_time_seconds?: number | null;
+  logical_depth?: number | null;
+  anticipated_shots?: number | null;
+  is_baseline: boolean;
+}
+
+export interface MetricsResponse {
+  metrics: ModelMetric[];
+}
+
 const API_BASE =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   "http://localhost:8000";
@@ -36,5 +48,10 @@ export async function getPrediction(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ticker, date, model_name }),
   });
+  return handleResponse(res);
+}
+
+export async function fetchModelMetrics(): Promise<MetricsResponse> {
+  const res = await fetch(`${API_BASE}/api/model-metrics`);
   return handleResponse(res);
 }

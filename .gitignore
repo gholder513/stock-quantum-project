@@ -7,12 +7,23 @@ __pycache__/
 node_modules/
 frontend/node_modules/
 
-# Data & models
+# Data & models (fixed)
+# Ignore model weight files, NOT your Python source files
 data/
 backend/data/
-models/
+
+# Ignore only common model artifacts
 *.csv
 *.pkl
+*.npy
+*.h5
+*.pt
+*.onnx
+
+# Allow Python source files in
+models/
+!backend/app/models/
+!backend/app/models/**/*.py
 
 # Build outputs
 dist/

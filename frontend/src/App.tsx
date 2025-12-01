@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchTickers, getPrediction } from "./services/api";
 import type { PredictionResponse } from "./services/api";
 import "./App.css";
+import { ModelMetricsPanel } from "./components/ModelMetricsPanel";
 
 function App() {
   const [tickers, setTickers] = useState<string[]>([]);
@@ -176,6 +177,7 @@ function App() {
             </>
           )}
         </div>
+        <ModelMetricsPanel />
       </div>
     </div>
   );

@@ -2,8 +2,10 @@ from typing import List
 
 import numpy as np
 import pandas as pd
+import json
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pathlib import Path
 
 from app import config
 from app.data.load_data import load_or_build_all_data
@@ -15,9 +17,14 @@ from app.models.classical import (
 from app.models.quantum import (
     quantum_vqc_predict,
     quantum_qnn_predict,
+    MODELS_DIR,
 )
-from app.schemas import PredictionRequest, PredictionResponse
-
+from app.schemas import (
+    PredictionRequest,
+    PredictionResponse,
+    MetricsResponse,
+    ModelMetric,
+)
 app = FastAPI(title="Stock Quantum Project API")
 
 # Allow local frontend (Vite dev server)
@@ -38,6 +45,7 @@ DATA_DF: pd.DataFrame | None = None
 RF_MODEL = None
 LOGREG_MODEL = None
 SVM_MODEL = None
+METRICS_PATH = MODELS_DIR / "metrics.json"
 
 
 def ensure_data_and_models_loaded() -> None:
@@ -84,6 +92,39 @@ def startup_event() -> None:
 def health():
     return {"status": "ok"}
 
+@app.get("/api/model-metrics", response_model=MetricsResponse)
+def get_model_metrics():
+    if not METRICS_PATH.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Model metrics not found. Run evaluate_models.py first.",
+        )
+
+    try:
+        raw = json.load(METRICS_PATH.open("r"))
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to read metrics.json: {e!r}",
+        )
+
+    metrics_list: list[ModelMetric] = []
+    for name, data in raw.items():
+        kind = "quantum" if name.startswith("quantum_") else "classical"
+        metrics_list.append(
+            ModelMetric(
+                name=name,
+                kind=kind,
+                accuracy_vs_true=float(data.get("accuracy_vs_true", 0.0)),
+                agreement_with_rf=float(data.get("agreement_with_rf", 0.0)),
+                training_time_seconds=data.get("training_time_seconds"),
+                logical_depth=data.get("logical_depth"),
+                anticipated_shots=data.get("anticipated_shots"),
+                is_baseline=bool(data.get("is_baseline", False)),
+            )
+        )
+
+    return MetricsResponse(metrics=metrics_list)
 
 @app.get("/api/tickers")
 def list_tickers() -> List[str]:
