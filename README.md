@@ -1,9 +1,19 @@
 # Stock Movement Classification Using Classical & Quantum Models (2015–2020)
 
 ##  Developer Notes
-Ran into early developmental issue where we had an unoriginal distribution of holds dominating our random forest output. This was due to our metrics being to agressive. For major S&P companies a 5% return change over a 10 day hold period is unlikely. I've been messing with changing our threshold to 3 and even 2% to encourage more volatility. We can also have our model give balanced weights but that will lower accuracy which I'm trying to stray away from doing if possible(changing class weights to balanced in our training function, class_weight="balanced").
 
+November 29:
+Ran into early developmental issue where we had an unoriginal distribution of holds dominating our random forest output. This was due to our metrics being to agressive. For major S&P companies a 5% return change over a 10 day hold period is unlikely. I've been messing with changing our threshold to 3 and even 2% to encourage more volatility. We can also have our model give balanced weights but that will lower accuracy which I'm trying to stray away from doing if possible(changing class weights to balanced in our training function, class_weight="balanced").
+- Gabriel H.
+
+Nov 27th(Happy thanksgiving):
 Moved to a 1% change on 2 day look ahead. 
+- Gabriel H.
+
+New work to be done(November 30th 10:47pm):
+We should add a section in the app where our data and decision labels
+are coming from. We are using 5 and 10 day moving averages, daily return averages and more to determine what to do. Based on these features and their associated labels we made during preprocessing, when each model goes through, they associate each feature with certain weights to make more informed decisions. The quantum systems use additional features/weights and adjust differently than the other classical programming models. This is the general idea and I'll add more later so we can have an explanation in our front-end. I'd also love to add graphs to visually represent the agreeance with the RF since that's what we used to preprocess. Hence why our output is 1.0 for it right now. Also would be great if we could add a section explaining our depth and shots since these are simulated and not using actual quantum hardware. 
+- Gabriel H.
 
 For reference this was our original label distribution with 5% return and a 10 day hold period:
 Label distribution:
