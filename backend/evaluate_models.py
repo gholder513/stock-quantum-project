@@ -1,3 +1,13 @@
+# backend/evaluate_models.py
+"""
+Evaluate all models (classical + quantum) on the full dataset.
+
+Metrics:
+- Accuracy vs TRUE labels
+- Agreement with Random Forest baseline (treat RF as "oracle")
+- Quantum model metadata: logical depth and anticipated shots
+"""
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -17,8 +27,8 @@ from app.models.classical import (
 from app.models.quantum import (
     quantum_vqc_predict,
     quantum_qnn_predict,
+    MODELS_DIR,  # <- reuse same models/ directory as quantum.py
 )
-from app.models.quantum import MODELS_DIR  # reuse same models dir
 
 QUANTUM_METADATA: Dict[str, Dict[str, int]] = {
     "quantum_vqc": {
@@ -44,6 +54,28 @@ def _load_train_times() -> Dict[str, float]:
     return {}
 
 
+def _predict_quantum_batch(X: np.ndarray, which: str) -> np.ndarray:
+    """
+    Run quantum model on each sample in X.
+
+    which: "quantum_vqc" or "quantum_qnn"
+    """
+    if which == "quantum_vqc":
+        qfunc = quantum_vqc_predict
+    elif which == "quantum_qnn":
+        qfunc = quantum_qnn_predict
+    else:
+        raise ValueError(f"Unknown quantum model: {which}")
+
+    preds = []
+    for i in range(X.shape[0]):
+        probs = qfunc(X[i])
+        decision = max(probs, key=probs.get)
+        preds.append(decision)
+
+    return np.array(preds)
+
+
 def evaluate_all() -> Dict[str, Any]:
     print("Loading full dataset for evaluation...")
     df = load_or_build_all_data()
@@ -55,6 +87,7 @@ def evaluate_all() -> Dict[str, Any]:
     print(f"Feature columns: {config.FEATURE_COLS}")
     print()
 
+    # classical models
     print("Loading classical models (from saved .pkl files)...")
     rf = get_random_forest_model()
     logreg = get_logreg_model()
@@ -65,10 +98,8 @@ def evaluate_all() -> Dict[str, Any]:
     y_logreg = logreg.predict(X)
     y_svm = svm.predict(X)
 
-    # Core numeric metrics
     metrics: Dict[str, Dict[str, Any]] = {}
 
-    # Helper to compute accuracy vs true + agreement with RF
     def add_metrics(name_key: str, y_pred: np.ndarray):
         metrics.setdefault(name_key, {})
         metrics[name_key]["accuracy_vs_true"] = float(
@@ -82,45 +113,31 @@ def evaluate_all() -> Dict[str, Any]:
     add_metrics("logreg", y_logreg)
     add_metrics("svm_linear", y_svm)
 
+    # quantum models
     print("\nRunning quantum models (this may be slower)...")
-    def _predict_quantum_batch(X: np.ndarray, which: str) -> np.ndarray:
-        if which == "quantum_vqc":
-            qfunc = quantum_vqc_predict
-        elif which == "quantum_qnn":
-            qfunc = quantum_qnn_predict
-        else:
-            raise ValueError(f"Unknown quantum model: {which}")
-
-        preds = []
-        for i in range(X.shape[0]):
-            probs = qfunc(X[i])
-            decision = max(probs, key=probs.get)
-            preds.append(decision)
-        return np.array(preds)
-
     y_vqc = _predict_quantum_batch(X, "quantum_vqc")
     y_qnn = _predict_quantum_batch(X, "quantum_qnn")
 
     add_metrics("quantum_vqc", y_vqc)
     add_metrics("quantum_qnn", y_qnn)
 
-    # Attach quantum metadata
+    # quantum metadata
     for q_name, meta in QUANTUM_METADATA.items():
         metrics.setdefault(q_name, {})
         metrics[q_name]["logical_depth"] = meta["logical_depth"]
         metrics[q_name]["anticipated_shots"] = meta["anticipated_shots"]
 
-    # Attach training times (if available)
+    # training times (if present)
     train_times = _load_train_times()
     for model_name, t in train_times.items():
         metrics.setdefault(model_name, {})
         metrics[model_name]["training_time_seconds"] = float(t)
 
-    # Mark RF as the baseline
+    # mark RF as the baseline/oracle
     metrics.setdefault("random_forest", {})
     metrics["random_forest"]["is_baseline"] = True
 
-    # Persist metrics to JSON for the API
+    # save to JSON for the API
     METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
     with METRICS_PATH.open("w") as f:
         json.dump(metrics, f, indent=2)

@@ -148,7 +148,6 @@ if __name__ == "__main__":
     t_qnn = time.time() - t0
     print(f"[Timing] Quantum QNN training time: {t_qnn:.3f} seconds")
 
-    # Update training times JSON
     if TRAIN_TIMES_PATH.exists():
         try:
             existing = json.load(TRAIN_TIMES_PATH.open("r"))
