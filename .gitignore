@@ -9,7 +9,7 @@ frontend/node_modules/
 
 # Data & models (fixed)
 # Ignore model weight files, NOT your Python source files
-data/
+# data/
 backend/data/
 
 # Ignore only common model artifacts
