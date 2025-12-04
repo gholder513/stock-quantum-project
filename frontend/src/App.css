@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 
 select option {
   color: #1e293b !important;
@@ -28,7 +28,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   padding: 2rem;
@@ -60,20 +60,29 @@ body {
 }
 
 .hero-header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.2), transparent 50%),
-              radial-gradient(circle at 80% 50%, rgba(118, 75, 162, 0.2), transparent 50%);
+  background: radial-gradient(
+      circle at 20% 50%,
+      rgba(102, 126, 234, 0.2),
+      transparent 50%
+    ),
+    radial-gradient(circle at 80% 50%, rgba(118, 75, 162, 0.2), transparent 50%);
   animation: pulse 8s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .hero-content {
@@ -122,6 +131,16 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2.5rem;
+}
+
+.content-wrapper2 {
+  padding: 3rem;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem; /* space between cards */
 }
 
 .card {
@@ -374,11 +393,11 @@ body {
   .content-wrapper {
     grid-template-columns: 1fr;
   }
-  
+
   .main-title {
     font-size: 2.5rem;
   }
-  
+
   .meta-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -388,24 +407,76 @@ body {
   body {
     padding: 1rem;
   }
-  
+
   .hero-header {
     padding: 2rem 1.5rem;
   }
-  
+
   .content-wrapper {
     padding: 1.5rem;
   }
-  
+
   .card {
     padding: 1.5rem;
   }
-  
+
   .main-title {
     font-size: 2rem;
   }
-  
+
   .meta-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* Metrics Panel */
+.metrics-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  margin: 3rem;
+}
+
+.metrics-card h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 1.5rem;
+}
+
+.metrics-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.metrics-card th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+}
+
+.metrics-card td {
+  padding: 0.75rem 1rem;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.metrics-card tr:hover {
+  background: #f8fafc;
+}
+
+.metrics-card .baseline-badge {
+  margin-left: 0.5rem;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  background: #bfdbfe;
+  color: #1d4ed8;
+  font-weight: 600;
 }
