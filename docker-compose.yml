@@ -1,8 +1,8 @@
 services:
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
     container_name: stock-backend
     ports:
       - "8000:8000"
@@ -15,8 +15,8 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
     container_name: stock-frontend
     ports:
       - "5173:5173"

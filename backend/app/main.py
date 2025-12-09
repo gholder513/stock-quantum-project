@@ -75,17 +75,11 @@ def ensure_data_and_models_loaded() -> None:
 @app.on_event("startup")
 def startup_event() -> None:
     """
-    Eagerly load data and models on startup.
-    If this fails for some reason, ensure_data_and_models_loaded()
-    will still handle it lazily on first request.
+    Don't load anything at startup to save memory.
+    Models will be loaded on first request via ensure_data_and_models_loaded().
     """
-    print("Loading data and models at startup...")
-    try:
-        ensure_data_and_models_loaded()
-        print("Startup complete.")
-    except Exception as e:
-        # Don't crash the app lazy loader will retry later.
-        print(f"Startup encountered an error (will retry lazily): {e!r}")
+    print("Startup event: Skipping preload to conserve memory.")
+    print("Models and data will be loaded on first API request.")
 
 
 @app.get("/api/health")

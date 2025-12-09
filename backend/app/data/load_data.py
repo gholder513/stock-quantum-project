@@ -172,39 +172,62 @@ def build_or_load_processed_ticker(ticker: str) -> pd.DataFrame:
     """
     Return processed data (features + labels) for a single ticker,
     caching it in data/processed/<TICKER>_features_labels.csv
+    
+    Only load existing files, don't download in production.
     """
     processed_path = PROCESSED_DIR / f"{ticker}_features_labels.csv"
     if processed_path.exists():
         return pd.read_csv(processed_path)
 
-    raw_df = download_raw_data(ticker)
-    processed_df = build_features_and_labels(raw_df)
-    processed_df.to_csv(processed_path, index=False)
-    return processed_df
+    # Don't download in production (raises error instead)
+    raise FileNotFoundError(
+        f"Processed data not found at {processed_path}. "
+        f"Please run data processing locally and commit the files to Git."
+    )
+
 
 def load_or_build_all_data(tickers: List[str] = None) -> pd.DataFrame:
     """
-    Build or load processed data for all tickers and concatenate into one DataFrame.
+    Load processed data for all tickers from disk and concatenate into one DataFrame.
+    
+    MODIFIED: Only loads existing files, never downloads fresh data.
+    This prevents memory issues on deployment platforms.
     """
     import traceback
 
     if tickers is None:
         tickers = config.TICKERS
 
+    # Check if processed directory has files
+    processed_files = list(PROCESSED_DIR.glob("*_features_labels.csv"))
+    
+    if not processed_files:
+        raise RuntimeError(
+            f"No processed data files found in {PROCESSED_DIR}. "
+            f"Please run data processing locally first and commit the CSV files to Git."
+        )
+
+    print(f"Found {len(processed_files)} processed data files in {PROCESSED_DIR}")
+
     frames = []
     for t in tickers:
         try:
-            print(f"Processing ticker {t}...")
-            df_t = build_or_load_processed_ticker(t)
-            frames.append(df_t)
+            processed_path = PROCESSED_DIR / f"{t}_features_labels.csv"
+            if processed_path.exists():
+                print(f"Loading ticker {t} from {processed_path.name}...")
+                df_t = pd.read_csv(processed_path)
+                frames.append(df_t)
+            else:
+                print(f"Warning: No processed file found for ticker {t}, skipping...")
         except Exception as e:
-            print(f"Error processing {t}: {e!r}")
+            print(f"Error loading {t}: {e!r}")
             traceback.print_exc()
 
     if not frames:
-        raise RuntimeError("No data found or processed for any ticker.")
+        raise RuntimeError("No data could be loaded from any ticker.")
 
     full_df = pd.concat(frames, ignore_index=True)
     full_df["Date"] = full_df["Date"].astype(str)
 
+    print(f"Loaded {len(full_df)} total rows from {len(frames)} tickers")
     return full_df

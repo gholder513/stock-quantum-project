@@ -133,20 +133,53 @@ def train_and_save_svm_linear() -> None:
 
 
 def get_random_forest_model():
+    """
+    Load the Random Forest model from disk.
+    
+    Only loads pre-trained model, never trains in production.
+    """
     if not RF_MODEL_PATH.exists():
-        train_and_save_random_forest()
+        raise FileNotFoundError(
+            f"Random Forest model not found at {RF_MODEL_PATH}. "
+            f"Please run 'python -m app.models.classical' locally to train models, "
+            f"then commit the .pkl files to Git."
+        )
+    
+    print(f"Loading Random Forest model from {RF_MODEL_PATH}")
     return joblib.load(RF_MODEL_PATH)
 
 
 def get_logreg_model():
+    """
+    Load the Logistic Regression model from disk.
+    
+    Only loads pre-trained model, never trains in production.
+    """
     if not LOGREG_MODEL_PATH.exists():
-        train_and_save_logreg()
+        raise FileNotFoundError(
+            f"Logistic Regression model not found at {LOGREG_MODEL_PATH}. "
+            f"Please run 'python -m app.models.classical' locally to train models, "
+            f"then commit the .pkl files to Git."
+        )
+    
+    print(f"Loading Logistic Regression model from {LOGREG_MODEL_PATH}")
     return joblib.load(LOGREG_MODEL_PATH)
 
 
 def get_svm_model():
+    """
+    Load the SVM model from disk.
+    
+    Only loads pre-trained model, never trains in production.
+    """
     if not SVM_MODEL_PATH.exists():
-        train_and_save_svm_linear()
+        raise FileNotFoundError(
+            f"Linear SVM model not found at {SVM_MODEL_PATH}. "
+            f"Please run 'python -m app.models.classical' locally to train models, "
+            f"then commit the .pkl files to Git."
+        )
+    
+    print(f"Loading Linear SVM model from {SVM_MODEL_PATH}")
     return joblib.load(SVM_MODEL_PATH)
 
 
