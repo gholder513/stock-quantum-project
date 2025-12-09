@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { fetchTickers, getPrediction } from "./services/api";
 import type { PredictionResponse } from "./services/api";
 import "./App.css";
