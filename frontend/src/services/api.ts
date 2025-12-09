@@ -25,17 +25,17 @@ const API_BASE =
   (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
   "http://localhost:8000";
 
-async function handleResponse(res: Response) {
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+async function handleResponse(response: Response) {
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`HTTP ${response.status}: ${text || response.statusText}`);
   }
-  return res.json();
+  return response.json();
 }
 
 export async function fetchTickers(): Promise<string[]> {
-  const res = await fetch(`${API_BASE}/api/tickers`);
-  return handleResponse(res);
+  const response = await fetch(`${API_BASE}/api/tickers`);
+  return handleResponse(response);
 }
 
 export async function getPrediction(
@@ -43,15 +43,15 @@ export async function getPrediction(
   date: string,
   model_name: string
 ): Promise<PredictionResponse> {
-  const res = await fetch(`${API_BASE}/api/predict`, {
+  const response = await fetch(`${API_BASE}/api/predict`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ticker, date, model_name }),
   });
-  return handleResponse(res);
+  return handleResponse(response);
 }
 
 export async function fetchModelMetrics(): Promise<MetricsResponse> {
-  const res = await fetch(`${API_BASE}/api/model-metrics`);
-  return handleResponse(res);
+  const response = await fetch(`${API_BASE}/api/model-metrics`);
+  return handleResponse(response);
 }

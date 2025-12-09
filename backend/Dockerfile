@@ -21,6 +21,7 @@ RUN mkdir -p data/raw data/processed models
 COPY backend/app ./app
 
 # Your trained models live in repo-root/models
+COPY data ./data
 COPY models ./models
 
 EXPOSE 8000
