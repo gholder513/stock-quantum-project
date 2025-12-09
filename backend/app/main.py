@@ -31,7 +31,7 @@ app = FastAPI(title="Stock Quantum Project API")
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://stockquantum.netlify.app/"
+    "https://stockquantum.netlify.app"
 ]
 
 app.add_middleware(
