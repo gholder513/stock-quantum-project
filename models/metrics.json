@@ -1,0 +1,31 @@
+{
+  "random_forest": {
+    "accuracy_vs_true": 0.9175050301810865,
+    "agreement_with_rf": 1.0,
+    "training_time_seconds": 0.20342397689819336,
+    "is_baseline": true
+  },
+  "logreg": {
+    "accuracy_vs_true": 0.6327967806841046,
+    "agreement_with_rf": 0.6780684104627767,
+    "training_time_seconds": 0.55548095703125
+  },
+  "svm_linear": {
+    "accuracy_vs_true": 0.6314553990610329,
+    "agreement_with_rf": 0.6747149564050973,
+    "training_time_seconds": 0.25539612770080566
+  },
+  "quantum_vqc": {
+    "accuracy_vs_true": 0.1448692152917505,
+    "agreement_with_rf": 0.12608987256874582,
+    "logical_depth": 3,
+    "anticipated_shots": 1024
+  },
+  "quantum_qnn": {
+    "accuracy_vs_true": 0.6314553990610329,
+    "agreement_with_rf": 0.6747149564050973,
+    "logical_depth": 4,
+    "anticipated_shots": 1024,
+    "training_time_seconds": 49.47246599197388
+  }
+}
