@@ -27,10 +27,11 @@ from app.schemas import (
 )
 app = FastAPI(title="Stock Quantum Project API")
 
-# Allow local frontend (Vite dev server)
+# Allow local frontend and deployed (Vite dev server)
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://stockquantum.netlify.app/"
 ]
 
 app.add_middleware(
