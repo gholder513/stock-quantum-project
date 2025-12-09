@@ -20,8 +20,8 @@ RUN mkdir -p data/raw data/processed models
 # Backend source code lives in backend/app
 COPY backend/app ./app
 
-# Your trained models live in repo-root/models
-COPY data ./data
+# only wanted the processed data and models in the container(don't need raw data for production, only dev)
+COPY backend/data/processed ./backend/data/processed
 COPY models ./models
 
 EXPOSE 8000
