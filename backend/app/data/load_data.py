@@ -16,7 +16,7 @@ from app import config
 #   0 -> data
 #   1 -> app
 #   2 -> backend (locally) or /app (in container)
-BACKEND_DIR = Path(__file__).resolve().parents[2]
+BACKEND_DIR = Path(__file__).resolve().parents[2] / "backend"
 DATA_DIR = BACKEND_DIR / "data"
 RAW_DIR = DATA_DIR / "raw"
 PROCESSED_DIR = DATA_DIR / "processed"
