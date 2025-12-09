@@ -123,14 +123,14 @@ def build_features_and_labels(df: pd.DataFrame) -> pd.DataFrame:
     df["Adj Close"] = pd.to_numeric(adj, errors="coerce")
     df["Volume"] = pd.to_numeric(vol, errors="coerce")
 
-    # 1. Daily return
+    # Daily return
     df["daily_return"] = df["Adj Close"].pct_change()
 
-    # 2. Moving averages
+    # Moving averages
     df["ma_5"] = df["Adj Close"].rolling(window=5, min_periods=5).mean()
     df["ma_10"] = df["Adj Close"].rolling(window=10, min_periods=10).mean()
 
-    # 3. Momentum (14-day simple momentum)
+    # Momentum (14-day simple momentum)
     df["momentum_14"] = df["Adj Close"] - df["Adj Close"].shift(14)
 
     # 4. Volume z-score over last 20 days

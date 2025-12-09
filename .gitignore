@@ -7,9 +7,12 @@ __pycache__/
 node_modules/
 frontend/node_modules/
 
-# Data (but keep models in Git)
-backend/data/
-*.csv
+# Data & models
+# Ignore only raw downloaded data; keep processed features & trained models
+backend/data/raw/
+data/raw/
+
+# (backend/data/processed and models/ will be tracked)
 
 # Build outputs
 dist/
