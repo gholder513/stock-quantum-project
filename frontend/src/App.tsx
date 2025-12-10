@@ -86,7 +86,7 @@ function App() {
 
           {/* Landing-page experiment sentence (verbatim first part) */}
           <p className="subtitle">
-            I’ve simulate highly volatile stock trading based on futures
+            Simulated highly volatile stock trading based on futures
             calculated on a 2 day look-ahead window. We use a buy and sell
             threshold of +- 1%. The point of the study is to compare the
             accuracy of traditional ML algorithms against a 2-qubit
@@ -340,19 +340,18 @@ function App() {
           {/* TEXT ABOVE EDITOR (verbatim) */}
           <div className="research-text-block">
             <p>
-              I’ve simulate highly volatile stock trading based on futures
-              calculated on a 2 day look-ahead window. We use a buy and sell
+              Highly volatile stock trading based on futures
+              calculated on a two day look-ahead window. We use a buy and sell
               threshold of +- 1%. The point of the study is to compare the
               accuracy of traditional ML algorithms against a 2-qubit
               parameterized circuit when the dataset is extremely condensed and
-              data is sparse(5 year window). To do this I encoded our
+              data is sparse(5 year window). This task is acomplished using
               features(the same ones we used for our classical models,
               Supported Vector Machine, logistic regression and Random Forest)
-              and simulate the its state vector using Qiskit. We then derived
-              our probabilities from there. I added the quantum neural network
-              functionality by using pennylane’s functionality available to
-              simulate rotations and had those act as the layers with weights
-              that continuously got updated as the model trained. In terms of
+              and simulated its state vector using Qiskit. From there probabilities are derived. 
+              For the Quantum neural network we used pennylane’s rotational and entaglement methods
+              available to simulated actual qubits and had those act
+              as the layers with weights that continuously got updated as the model trained. In terms of
               the features we chose our yahoo finance dataset had a couple handy
               metrics but overall it was generally limited in scope of what we
               could derive from one dataset. I chose to prioritize a few
@@ -405,12 +404,12 @@ function App() {
             />
           </div>
 
-          {/* TEXT BELOW EDITOR (verbatim) */}
+          
           <div className="research-text-block" style={{ marginTop: "1.25rem" }}>
             <p>
               These are the features the models trained on without knowing the
-              labels. We also preprocessed the labels for the sake of simplicity
-              I based it on future returns and simulated a day trading
+              labels. Also preprocessed the labels for the sake of simplicity
+              and based it on future returns and simulated a day trading
               environment making decisions to buy or sell on a 1% margin gain
               or loss. It’s important to note when looking at the accuracy of
               the models that these were designed for variance. NASDAQ
