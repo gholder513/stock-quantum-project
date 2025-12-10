@@ -3,6 +3,7 @@ import { fetchTickers, getPrediction } from "./services/api";
 import type { PredictionResponse } from "./services/api";
 import "./App.css";
 import { ModelMetricsPanel } from "./components/ModelMetricsPanel";
+import Editor from "@monaco-editor/react";
 
 function App() {
   const [tickers, setTickers] = useState<string[]>([]);
@@ -82,10 +83,41 @@ function App() {
       <div className="hero-header">
         <div className="hero-content">
           <h1 className="main-title">Quantum Trading AI</h1>
+
+          {/* Landing-page experiment sentence (verbatim first part) */}
+          <p className="subtitle">
+            I’ve simulate highly volatile stock trading based on futures
+            calculated on a 2 day look-ahead window. We use a buy and sell
+            threshold of +- 1%. The point of the study is to compare the
+            accuracy of traditional ML algorithms against a 2-qubit
+            parameterized circuit when the dataset is extremely condensed and
+            data is sparse(5 year window).
+          </p>
+
           <div className="badges">
             <span className="badge">Quantum Computing</span>
             <span className="badge">2015-2020 Dataset</span>
             <span className="badge">5 ML Models</span>
+          </div>
+
+          {/* Small hero metric cards */}
+          <div className="hero-meta">
+            <div className="hero-pill">
+              <span className="hero-pill-label">Look-ahead horizon</span>
+              <span className="hero-pill-value">2-day futures window</span>
+            </div>
+            <div className="hero-pill">
+              <span className="hero-pill-label">Trading regime</span>
+              <span className="hero-pill-value">
+                ±1% intraday BUY / SELL threshold
+              </span>
+            </div>
+            <div className="hero-pill">
+              <span className="hero-pill-label">Models compared</span>
+              <span className="hero-pill-value">
+                RF, LogReg, SVM, Quantum VQC, Quantum QNN
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -295,6 +327,215 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Technical details / write-up section */}
+      <section className="research-section">
+        <div className="card research-main-card">
+          <h2 className="card-title">Technical Details</h2>
+          <p className="card-subtitle">
+            Full description of how the dataset, features, classical baselines,
+            and quantum models fit together.
+          </p>
+
+          {/* TEXT ABOVE EDITOR (verbatim) */}
+          <div className="research-text-block">
+            <p>
+              I’ve simulate highly volatile stock trading based on futures
+              calculated on a 2 day look-ahead window. We use a buy and sell
+              threshold of +- 1%. The point of the study is to compare the
+              accuracy of traditional ML algorithms against a 2-qubit
+              parameterized circuit when the dataset is extremely condensed and
+              data is sparse(5 year window). To do this I encoded our
+              features(the same ones we used for our classical models,
+              Supported Vector Machine, logistic regression and Random Forest)
+              and simulate the its state vector using Qiskit. We then derived
+              our probabilities from there. I added the quantum neural network
+              functionality by using pennylane’s functionality available to
+              simulate rotations and had those act as the layers with weights
+              that continuously got updated as the model trained. In terms of
+              the features we chose our yahoo finance dataset had a couple handy
+              metrics but overall it was generally limited in scope of what we
+              could derive from one dataset. I chose to prioritize a few
+              features and potentially expand on them later if I choose to come
+              back to the project in the future. We had:
+            </p>
+            <p style={{ marginTop: "0.75rem" }}>
+              Date,Adj Close,Close,High,Low,Open,Volume,ticker
+              <br />
+              From our dataset. As a part of preprocessing I calculated the
+              following features to use in the project:
+            </p>
+          </div>
+
+          {/* MONACO EDITOR – ONLY THE CODE BLOCK */}
+          <div className="monaco-wrapper">
+            <Editor
+              height="260px"
+              defaultLanguage="python"
+              theme="vs-dark"
+              options={{
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                lineNumbers: "on",
+              }}
+              defaultValue={`vol = df["Volume"]
+    if isinstance(vol, pd.DataFrame):
+        vol = vol.iloc[:, 0]
+
+    df["Adj Close"] = pd.to_numeric(adj, errors="coerce")
+    df["Volume"] = pd.to_numeric(vol, errors="coerce")
+
+    # Daily return
+    df["daily_return"] = df["Adj Close"].pct_change()
+
+    # Moving averages
+    df["ma_5"] = df["Adj Close"].rolling(window=5, min_periods=5).mean()
+    df["ma_10"] = df["Adj Close"].rolling(window=10, min_periods=10).mean()
+
+    # Momentum (14-day simple momentum)
+    df["momentum_14"] = df["Adj Close"] - df["Adj Close"].shift(14)
+
+    # Volume z-score over last 20 days
+    vol_rolling_mean = df["Volume"].rolling(window=20, min_periods=20).mean()
+    vol_rolling_std = df["Volume"].rolling(window=20, min_periods=20).std()
+    df["volume_zscore_20"] = (df["Volume"] - vol_rolling_mean) / vol_rolling_std.replace(
+        0, np.nan
+    )`}
+            />
+          </div>
+
+          {/* TEXT BELOW EDITOR (verbatim) */}
+          <div className="research-text-block" style={{ marginTop: "1.25rem" }}>
+            <p>
+              These are the features the models trained on without knowing the
+              labels. We also preprocessed the labels for the sake of simplicity
+              I based it on future returns and simulated a day trading
+              environment making decisions to buy or sell on a 1% margin gain
+              or loss. It’s important to note when looking at the accuracy of
+              the models that these were designed for variance. NASDAQ
+              companies having major fluctuations on a day to day basis of many
+              percentage points is unlikely due to their standing.
+            </p>
+
+            <p style={{ marginTop: "0.75rem" }}>
+              The metrics reflect that random forest’s performance was by far
+              the best getting an accuracy of 92% with the lowest training time.
+              The QNN Quantum Neural Network performance proved to be on par
+              with the other classical models. With more fine-tuning on features
+              alone I’m sure we could get almost all models above 80% accuracy.
+            </p>
+
+            <p style={{ marginTop: "0.75rem" }}>
+              In the future with this project I want to explore time series
+              forecasting just for personal experimentation. An implementation
+              would likely look like using Darts library with ARIMA or Meta’s
+              prophet model(I’ve heard good things about that) and potentially
+              using GARCH for some volatile forecasting for side metrics.
+            </p>
+
+            <p style={{ marginTop: "0.75rem" }}>Enjoy the app!</p>
+          </div>
+        </div>
+
+        {/* Side cards: feature snapshot + model comparison */}
+        <div className="research-grid">
+          <div className="card info-card">
+            <h3 className="card-title">Feature Engineering Snapshot</h3>
+            <p className="card-subtitle">
+              Core OHLCV fields are transformed into momentum, moving averages,
+              and volume anomalies before feeding models.
+            </p>
+            <pre className="code-block">
+{`# Core engineered signals
+df["daily_return"]   # 1-day log-style return
+df["ma_5"]           # 5-day moving average
+df["ma_10"]          # 10-day moving average
+df["momentum_14"]    # 14-day simple momentum
+df["volume_zscore_20"]  # 20-day z-scored volume spike detector`}
+            </pre>
+            <ul className="feature-list">
+              <li>Condensed 5-year window of NASDAQ-like tickers (2015–2020).</li>
+              <li>
+                Signals intentionally tuned for volatility in an otherwise
+                stable, large-cap universe.
+              </li>
+              <li>
+                Labels derived from ±1% forward returns to emulate intraday
+                decision-making.
+              </li>
+            </ul>
+          </div>
+
+          <div className="card info-card">
+            <h3 className="card-title">Model Comparison at a Glance</h3>
+            <p className="card-subtitle">
+              Random Forest is the efficiency benchmark; quantum models stay
+              competitive on a sparse, engineered feature space.
+            </p>
+
+            <div className="metric-grid">
+              <div className="metric-row">
+                <div className="metric-header">
+                  <span className="metric-label">
+                    Classical Random Forest{" "}
+                    <span className="metric-tag">Best accuracy</span>
+                  </span>
+                  <span className="metric-value">91.8%</span>
+                </div>
+                <div className="metric-bar">
+                  <div className="metric-fill" style={{ width: "91.8%" }} />
+                </div>
+              </div>
+
+              <div className="metric-row">
+                <div className="metric-header">
+                  <span className="metric-label">
+                    Classical Logistic Regression
+                  </span>
+                  <span className="metric-value">63.3%</span>
+                </div>
+                <div className="metric-bar">
+                  <div className="metric-fill" style={{ width: "63.3%" }} />
+                </div>
+              </div>
+
+              <div className="metric-row">
+                <div className="metric-header">
+                  <span className="metric-label">Classical Linear SVM</span>
+                  <span className="metric-value">63.1%</span>
+                </div>
+                <div className="metric-bar">
+                  <div className="metric-fill" style={{ width: "63.1%" }} />
+                </div>
+              </div>
+
+              <div className="metric-row">
+                <div className="metric-header">
+                  <span className="metric-label">Quantum VQC</span>
+                  <span className="metric-value">14.5%</span>
+                </div>
+                <div className="metric-bar">
+                  <div className="metric-fill" style={{ width: "14.5%" }} />
+                </div>
+              </div>
+
+              <div className="metric-row">
+                <div className="metric-header">
+                  <span className="metric-label">
+                    Quantum QNN{" "}
+                    <span className="metric-tag">On par w/ classical</span>
+                  </span>
+                  <span className="metric-value">63.1%</span>
+                </div>
+                <div className="metric-bar">
+                  <div className="metric-fill" style={{ width: "63.1%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <ModelMetricsPanel />
     </div>

@@ -133,7 +133,7 @@ def build_features_and_labels(df: pd.DataFrame) -> pd.DataFrame:
     # Momentum (14-day simple momentum)
     df["momentum_14"] = df["Adj Close"] - df["Adj Close"].shift(14)
 
-    # 4. Volume z-score over last 20 days
+    # Volume z-score over last 20 days
     vol_rolling_mean = df["Volume"].rolling(window=20, min_periods=20).mean()
     vol_rolling_std = df["Volume"].rolling(window=20, min_periods=20).std()
     df["volume_zscore_20"] = (df["Volume"] - vol_rolling_mean) / vol_rolling_std.replace(
