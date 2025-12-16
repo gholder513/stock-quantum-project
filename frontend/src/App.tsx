@@ -13,6 +13,7 @@ function App() {
   const [result, setResult] = useState<PredictionResponse | null>(null);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [loadingTickers, setLoadingTickers] = useState<boolean>(true);
   const [comparisonResults, setComparisonResults] = useState<
     PredictionResponse[] | null
   >(null);
@@ -21,7 +22,8 @@ function App() {
   useEffect(() => {
     fetchTickers()
       .then((t) => setTickers(t))
-      .catch((e) => setError(e.message));
+      .catch((e) => setError(e.message))
+      .finally(() => setLoadingTickers(false));
   }, []);
 
   const handlePredict = async () => {
@@ -86,12 +88,11 @@ function App() {
 
           {/* Landing-page experiment sentence (verbatim first part) */}
           <p className="subtitle">
-            Simulated highly volatile stock trading based on futures
-            calculated on a 2 day look-ahead window. We use a buy and sell
-            threshold of +- 1%. The point of the study is to compare the
-            accuracy of traditional ML algorithms against a 2-qubit
-            parameterized circuit when the dataset is extremely condensed and
-            data is sparse(5 year window).
+            Simulated highly volatile stock trading based on futures calculated
+            on a 2 day look-ahead window. We use a buy and sell threshold of +-
+            1%. The point of the study is to compare the accuracy of traditional
+            ML algorithms against a 2-qubit parameterized circuit when the
+            dataset is extremely condensed and data is sparse(5 year window).
           </p>
 
           <div className="badges">
@@ -136,7 +137,13 @@ function App() {
             </div>
           )}
 
-          <div className="form-group">
+          {/* <div className="form-group">
+            <p className="card-subtitle">
+            IF STOCK TICKER NOT LOADING, DB IS DOWNLOADING DATA FROM YAHOO FINANCE
+          </p>
+          <p className="card-subtitle">
+            DO NOT REFRESH PAGE AND CHECK BACK EVERY 60 SECONDS
+          </p>
             <label className="form-label">Stock Ticker</label>
             <select
               className="form-select"
@@ -150,6 +157,43 @@ function App() {
                 </option>
               ))}
             </select>
+          </div> */}
+          <div className="form-group">
+            <p className="card-subtitle">
+              IF STOCK TICKER NOT LOADING, DB IS DOWNLOADING DATA FROM YAHOO
+              FINANCE
+            </p>
+            <p className="card-subtitle">
+              DO NOT REFRESH PAGE AND CHECK BACK EVERY 60 SECONDS
+            </p>
+
+            <label className="form-label">Stock Ticker</label>
+
+            {loadingTickers ? (
+              <div className="loading-tickers-placeholder">
+                <div className="placeholder-icon">⏳</div>
+                <p className="card-subtitle" style={{ marginTop: "0.5rem" }}>
+                  Loading tickers…
+                </p>
+                <p className="card-subtitle" style={{ opacity: 0.8 }}>
+                  Pulling market data & preparing models
+                </p>
+              </div>
+            ) : (
+              <select
+                className="form-select"
+                value={selectedTicker}
+                onChange={(e) => setSelectedTicker(e.target.value)}
+                disabled={loadingTickers}
+              >
+                <option value="">Choose a stock...</option>
+                {tickers.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div className="form-group">
@@ -340,23 +384,23 @@ function App() {
           {/* TEXT ABOVE EDITOR (verbatim) */}
           <div className="research-text-block">
             <p>
-              Highly volatile stock trading based on futures
-              calculated on a two day look-ahead window. We use a buy and sell
-              threshold of +- 1%. The point of the study is to compare the
-              accuracy of traditional ML algorithms against a 2-qubit
-              parameterized circuit when the dataset is extremely condensed and
-              data is sparse(5 year window). This task is acomplished using
-              features(the same ones we used for our classical models,
-              Supported Vector Machine, logistic regression and Random Forest)
-              and simulated its state vector using Qiskit. From there probabilities are derived. 
-              For the Quantum neural network we used pennylane’s rotational and entaglement methods
-              available to simulated actual qubits and had those act
-              as the layers with weights that continuously got updated as the model trained. In terms of
-              the features we chose our yahoo finance dataset had a couple handy
-              metrics but overall it was generally limited in scope of what we
-              could derive from one dataset. I chose to prioritize a few
-              features and potentially expand on them later if I choose to come
-              back to the project in the future. We had:
+              Highly volatile stock trading based on futures calculated on a two
+              day look-ahead window. We use a buy and sell threshold of +- 1%.
+              The point of the study is to compare the accuracy of traditional
+              ML algorithms against a 2-qubit parameterized circuit when the
+              dataset is extremely condensed and data is sparse(5 year window).
+              This task is acomplished using features(the same ones we used for
+              our classical models, Supported Vector Machine, logistic
+              regression and Random Forest) and simulated its state vector using
+              Qiskit. From there probabilities are derived. For the Quantum
+              neural network we used pennylane’s rotational and entaglement
+              methods available to simulated actual qubits and had those act as
+              the layers with weights that continuously got updated as the model
+              trained. In terms of the features we chose our yahoo finance
+              dataset had a couple handy metrics but overall it was generally
+              limited in scope of what we could derive from one dataset. I chose
+              to prioritize a few features and potentially expand on them later
+              if I choose to come back to the project in the future. We had:
             </p>
             <p style={{ marginTop: "0.75rem" }}>
               Date,Adj Close,Close,High,Low,Open,Volume,ticker
@@ -404,17 +448,16 @@ function App() {
             />
           </div>
 
-          
           <div className="research-text-block" style={{ marginTop: "1.25rem" }}>
             <p>
               These are the features the models trained on without knowing the
               labels. Also preprocessed the labels for the sake of simplicity
               and based it on future returns and simulated a day trading
-              environment making decisions to buy or sell on a 1% margin gain
-              or loss. It’s important to note when looking at the accuracy of
-              the models that these were designed for variance. NASDAQ
-              companies having major fluctuations on a day to day basis of many
-              percentage points is unlikely due to their standing.
+              environment making decisions to buy or sell on a 1% margin gain or
+              loss. It’s important to note when looking at the accuracy of the
+              models that these were designed for variance. NASDAQ companies
+              having major fluctuations on a day to day basis of many percentage
+              points is unlikely due to their standing.
             </p>
 
             <p style={{ marginTop: "0.75rem" }}>
@@ -446,7 +489,7 @@ function App() {
               and volume anomalies before feeding models.
             </p>
             <pre className="code-block">
-{`# Core engineered signals
+              {`# Core engineered signals
 df["daily_return"]   # 1-day log-style return
 df["ma_5"]           # 5-day moving average
 df["ma_10"]          # 10-day moving average
@@ -454,7 +497,9 @@ df["momentum_14"]    # 14-day simple momentum
 df["volume_zscore_20"]  # 20-day z-scored volume spike detector`}
             </pre>
             <ul className="feature-list">
-              <li>Condensed 5-year window of NASDAQ-like tickers (2015–2020).</li>
+              <li>
+                Condensed 5-year window of NASDAQ-like tickers (2015–2020).
+              </li>
               <li>
                 Signals intentionally tuned for volatility in an otherwise
                 stable, large-cap universe.
