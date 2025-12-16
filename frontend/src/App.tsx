@@ -159,14 +159,6 @@ function App() {
             </select>
           </div> */}
           <div className="form-group">
-            <p className="card-subtitle">
-              IF STOCK TICKER NOT LOADING, DB IS DOWNLOADING DATA FROM YAHOO
-              FINANCE
-            </p>
-            <p className="card-subtitle">
-              DO NOT REFRESH PAGE AND CHECK BACK EVERY 60 SECONDS
-            </p>
-
             <label className="form-label">Stock Ticker</label>
 
             {loadingTickers ? (
@@ -177,6 +169,9 @@ function App() {
                 </p>
                 <p className="card-subtitle" style={{ opacity: 0.8 }}>
                   Pulling market data & preparing models
+                </p>
+                <p className="card-subtitle">
+                  DATABASE IS DOWNLOADING DATA FROM YAHOO FINANCE
                 </p>
               </div>
             ) : (
